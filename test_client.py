@@ -2,9 +2,11 @@ import requests
 import time
 import sys
 
-BASE_URL = "http://127.0.0.1:8000"
-USERNAME = "testuser"
-PASSWORD = "testpassword"
+import os
+
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
+USERNAME = os.getenv("TEST_USERNAME", "testuser")
+PASSWORD = os.getenv("TEST_PASSWORD", "testpassword")
 
 def run_test():
     print(">>> Starting System Verification...")
