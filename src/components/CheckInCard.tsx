@@ -1,54 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, Brain, Eye, Battery, Heart } from "lucide-react";
+import { Moon, Sun, Brain, Eye, Battery, Heart, Loader2 } from "lucide-react";
+import { burnoutService } from "@/services/burnout.service";
+import { useToast } from "@/hooks/use-toast";
+import type { Question as APIQuestion } from "@/types/api.types";
 
-interface Question {
-  id: string;
-  text: string;
-  category: string;
+interface Question extends APIQuestion {
   icon: React.ReactNode;
 }
 
-const questions: Question[] = [
-  {
-    id: "sleep",
-    text: "How refreshed did you feel after waking up today?",
-    category: "Sleep",
-    icon: <Moon className="w-5 h-5" />,
-  },
-  {
-    id: "focus",
-    text: "How easy was it to focus on one task today?",
-    category: "Focus",
-    icon: <Brain className="w-5 h-5" />,
-  },
-  {
-    id: "energy",
-    text: "Did you feel mentally tired before noon today?",
-    category: "Energy",
-    icon: <Battery className="w-5 h-5" />,
-  },
-  {
-    id: "screen",
-    text: "Did screens feel exhausting today?",
-    category: "Screen Fatigue",
-    icon: <Eye className="w-5 h-5" />,
-  },
-  {
-    id: "stress",
-    text: "How overwhelmed did you feel today?",
-    category: "Stress",
-    icon: <Heart className="w-5 h-5" />,
-  },
-  {
-    id: "mood",
-    text: "How would you describe your overall mood?",
-    category: "Mood",
-    icon: <Sun className="w-5 h-5" />,
-  },
-];
+// Icon mapping based on category
+const getCategoryIcon = (category: string) => {
+  const iconMap: Record<string, React.ReactNode> = {
+    Sleep: <Moon className="w-5 h-5" />,
+    Focus: <Brain className="w-5 h-5" />,
+    Energy: <Battery className="w-5 h-5" />,
+    Mood: <Sun className="w-5 h-5" />,
+    "Screen Fatigue": <Eye className="w-5 h-5" />,
+    Stress: <Heart className="w-5 h-5" />,
+  };
+  return iconMap[category] || <Brain className="w-5 h-5" />;
+};
 
 const responseOptions = [
   { value: 1, label: "Not at all", emoji: "😊" },
@@ -64,21 +38,68 @@ interface CheckInCardProps {
 }
 
 export function CheckInCard({ onComplete, className }: CheckInCardProps) {
-  // Rotate questions - show 2 random questions per day
-  const [currentQuestions] = useState(() => {
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 2);
-  });
-  
+  const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, number>>({});
   const [isComplete, setIsComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Fetch daily questions from API
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const apiQuestions = await burnoutService.getDailyQuestions();
+        const questionsWithIcons = apiQuestions.map(q => ({
+          ...q,
+          icon: getCategoryIcon(q.category),
+        }));
+        setCurrentQuestions(questionsWithIcons);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load questions. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuestions();
+  }, [toast]);
+
+  if (loading) {
+    return (
+      <div className={cn("glass-card p-8 text-center", className)}>
+        <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading questions...</p>
+      </div>
+    );
+  }
+
+  if (currentQuestions.length === 0) {
+    return (
+      <div className={cn("glass-card p-8 text-center", className)}>
+        <p className="text-muted-foreground">No questions available today.</p>
+      </div>
+    );
+  }
 
   const currentQuestion = currentQuestions[currentIndex];
 
-  const handleResponse = (value: number) => {
+  const handleResponse = async (value: number) => {
     const newResponses = { ...responses, [currentQuestion.id]: value };
     setResponses(newResponses);
+
+    // Submit response to API
+    try {
+      await burnoutService.submitResponse({
+        question_id: currentQuestion.id,
+        answer_value: value,
+      });
+    } catch (error) {
+      console.error("Failed to submit response:", error);
+    }
 
     if (currentIndex < currentQuestions.length - 1) {
       setTimeout(() => setCurrentIndex(currentIndex + 1), 300);
