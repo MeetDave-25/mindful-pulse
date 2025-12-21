@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Brain outline -->
+  <path d="M50 20 C35 20 25 30 25 42 C25 48 27 53 30 57 C28 60 27 64 27 68 C27 76 33 82 40 82 C42 82 44 81.5 46 80.5 C47 81.5 48.5 82 50 82 C51.5 82 53 81.5 54 80.5 C56 81.5 58 82 60 82 C67 82 73 76 73 68 C73 64 72 60 70 57 C73 53 75 48 75 42 C75 30 65 20 50 20 Z" 
+        fill="url(#brainGradient)" 
+        stroke="#6366F1" 
+        stroke-width="2"/>
+  
+  <!-- Pulse wave -->
+  <path d="M20 50 L35 50 L40 40 L45 60 L50 50 L55 50 L60 35 L65 50 L80 50" 
+        fill="none" 
+        stroke="#10B981" 
+        stroke-width="3" 
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.9"/>
+</svg>
