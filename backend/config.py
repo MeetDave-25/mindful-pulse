@@ -11,6 +11,9 @@ class Settings:
     # DATABASE
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     
+    # CORS - Allowed frontend origins (comma-separated for production)
+    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "")
+    
     # SECURITY
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-key-change-this-in-production")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
