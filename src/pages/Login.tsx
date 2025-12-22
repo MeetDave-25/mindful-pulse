@@ -40,9 +40,26 @@ const Login = () => {
             }
             navigate('/');
         } catch (error: any) {
+            console.error('Authentication error:', error);
+
+            let errorMessage = 'Something went wrong. Please try again.';
+
+            // Check for network errors
+            if (!error.response) {
+                errorMessage = 'Cannot connect to server. Please check your internet connection.';
+            } else if (error.response?.status === 400) {
+                errorMessage = error.response?.data?.detail || 'Invalid credentials. Please check your username and password.';
+            } else if (error.response?.status === 401) {
+                errorMessage = 'Incorrect username or password.';
+            } else if (error.response?.status === 500) {
+                errorMessage = 'Server error. Please try again later.';
+            } else if (error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
+            }
+
             toast({
                 title: 'Error',
-                description: error.response?.data?.detail || 'Something went wrong. Please try again.',
+                description: errorMessage,
                 variant: 'destructive',
             });
         } finally {
