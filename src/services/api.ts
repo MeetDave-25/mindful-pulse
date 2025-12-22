@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Base API URL - change this if backend is on different port
-export const API_BASE_URL = 'http://127.0.0.1:8000';
+// Base API URL - uses environment variable for production, localhost for development
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 // Create axios instance
 export const api = axios.create({
