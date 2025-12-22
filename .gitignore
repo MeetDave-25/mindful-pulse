@@ -18,6 +18,7 @@ dist-ssr
 # Environment files
 *.env
 *.env.*
+!.env.example
 
 # Test db / local sqlite
 *.sqlite3
